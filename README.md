@@ -1,3 +1,3 @@
-# 411-resources
+# CS411 Coursework
 
-Various resources helpful / necessary for BU's CS411 Software Engineering course
+Davin Martin's coursework for Boston University CS411 Software Engineering course.
