@@ -20,6 +20,17 @@ class Boxers(db.Model):
     manage boxer data, run simulations, and track fight outcomes.
 
     """
+    __tablename__ = "Boxers"
+
+    name = db.Column(db.String, primary_key=True, nullable=False)
+    weight = db.Column(db.Float, nullable=False)
+    weight_class = db.Column(db.String, nullable=False)
+    height = db.Column(db.Float, nullable=False)
+    reach = db.Column(db.Float, nullable=False)
+    age = db.Column(db.Integer, nullable=False)
+    fights = db.Column(db.Integer, nullable=False, default=0)
+    wins = db.Column(db.Integer, nullable=False, default=0)
+
 
     def __init__(self, name: str, weight: float, height: float, reach: float, age: int):
         """Initialize a new Boxer instance with basic attributes.
@@ -36,7 +47,14 @@ class Boxers(db.Model):
             - Fight statistics (`fights` and `wins`) are initialized to 0 by default in the database schema.
 
         """
-        pass
+        self.name = name.strip()
+        self.weight = weight
+        self.weight_class = self.get_weight_class(weight)
+        self.height = height
+        self.reach = reach
+        self.age = age
+        self.fights = 0
+        self.wins = 0
 
     @classmethod
     def get_weight_class(cls, weight: float) -> str:
@@ -58,7 +76,18 @@ class Boxers(db.Model):
             ValueError: If the weight is less than 125.
 
         """
-        pass
+        if weight >= 203:
+            weight_class = 'HEAVYWEIGHT'
+        elif weight >= 166:
+            weight_class = 'MIDDLEWEIGHT'
+        elif weight >= 133:
+            weight_class = 'LIGHTWEIGHT'
+        elif weight >= 125:
+            weight_class = 'FEATHERWEIGHT'
+        else:
+            raise ValueError(f"Invalid weight: {weight}. Weight must be at least 125.")
+
+        return weight_class
 
     @classmethod
     def create_boxer(cls, name: str, weight: float, height: float, reach: float, age: int) -> None:
