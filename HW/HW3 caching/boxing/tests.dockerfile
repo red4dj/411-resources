@@ -1,0 +1,16 @@
+# Use an official Python runtime as a parent image
+FROM python:3.13-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Install any needed packages specified in requirements.txt
+# As well as pytest
+RUN pip install --no-cache-dir pytest==8.3.5 pytest-mock==3.14.0
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Run app.py when the container launches
+CMD ["python", "-m", "pytest", "."]
