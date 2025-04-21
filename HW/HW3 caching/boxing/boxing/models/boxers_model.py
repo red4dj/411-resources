@@ -181,7 +181,7 @@ class Boxers(db.Model):
                 logger.info(f"Boxer with ID {boxer_id} not found.")
                 raise ValueError(f"Boxer with ID {boxer_id} not found.")
 
-            logger.info(f"Successfully retrieved boxer: {boxer.id} - {boxer.title}")
+            logger.info(f"Successfully retrieved boxer: {boxer.id} - {boxer.name}")
             return boxer
 
         except SQLAlchemyError as e:

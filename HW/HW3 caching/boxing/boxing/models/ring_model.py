@@ -148,7 +148,7 @@ class RingModel:
             expired = not (self._ttl.get(boxer_id, 0) > now)
             if expired:
                 try:
-                    boxer = Boxers.get_song_by_id(boxer_id)
+                    boxer = Boxers.get_boxer_by_id(boxer_id)
                     logger.info(f"Song ID {boxer_id} loaded from DB")
                 except ValueError as e:
                     logger.error(f"Song ID {boxer_id} not found in DB: {e}")
