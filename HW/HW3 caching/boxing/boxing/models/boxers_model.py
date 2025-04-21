@@ -183,7 +183,7 @@ class Boxers(db.Model):
         logger.info(f"Attempting to retrieve boxer with ID: {boxer_id}")
 
         try:
-            boxer = cls.query.get(boxer_id)
+            boxer = db.session.get(cls, boxer_id)
             if boxer is None or not boxer:
                 logger.info(f"Boxer with ID {boxer_id} not found.")
                 raise ValueError(f"Boxer with ID {boxer_id} not found.")
