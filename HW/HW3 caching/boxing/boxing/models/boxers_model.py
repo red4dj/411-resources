@@ -128,6 +128,13 @@ class Boxers(db.Model):
         logger.info(f"Creating boxer: {name}, {weight=} {height=} {reach=} {age=}")
 
         try:
+            if isinstance(weight, int):
+                weight = float(weight)
+            if isinstance(height, int):
+                height = float(height)
+            if isinstance(reach, int):
+                reach = float(reach)
+
             boxer = Boxers(
                 name=name.strip(),
                 weight=weight,
