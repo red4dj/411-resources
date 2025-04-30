@@ -56,7 +56,7 @@ def create_app(config_class=ProductionConfig):
         app.logger.info("Health check endpoint hit")
         return make_response(jsonify({
             'status': 'success',
-            'message': 'Service is running'
+            'message': 'Quack!'
         }), 200)
 
 
@@ -364,90 +364,80 @@ def create_app(config_class=ProductionConfig):
             }), 500)
 
 
-    # @app.route('/api/get-boxer-by-id/<int:boxer_id>', methods=['GET'])
-    # @login_required
-    # def get_boxer_by_id(boxer_id: int) -> Response:
-    #     """Route to get a boxer by its ID.
-    #
-    #     Path Parameter:
-    #         - boxer_id (int): The ID of the boxer.
-    #
-    #     Returns:
-    #         JSON response containing the boxer details if found.
-    #
-    #     Raises:
-    #         400 error if the boxer is not found.
-    #         500 error if there is an issue retrieving the boxer from the database.
-    #
-    #     """
-    #     try:
-    #         app.logger.info(f"Received request to retrieve boxer with ID {boxer_id}")
-    #
-    #         boxer = Boxers.get_boxer_by_id(boxer_id)
-    #
-    #         if not boxer:
-    #             app.logger.warning(f"Boxer with ID {boxer_id} not found.")
-    #             return make_response(jsonify({
-    #                 "status": "error",
-    #                 "message": f"Boxer with ID {boxer_id} not found"
-    #             }), 400)
-    #
-    #         app.logger.info(f"Successfully retrieved boxer: {boxer}")
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "boxer": boxer
-    #         }), 200)
-    #
-    #     except Exception as e:
-    #         app.logger.error(f"Error retrieving boxer with ID {boxer_id}: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while retrieving the boxer",
-    #             "details": str(e)
-    #         }), 500)
+    @app.route('/api/get-duck-by-id/<int:duck_id>', methods=['GET'])
+    @login_required
+    def get_duck_by_id(duck_id: int) -> Response:
+        """Route to get a duck by its ID.
+
+        Path Parameter:
+            - duck_id (int): The ID of the duck.
+
+        Returns:
+            JSON response containing the duck details if found.
+
+        Raises:
+            400 error if the boxer is not found.
+            500 error if there is an issue retrieving the boxer from the database.
+
+        """
+        try:
+            app.logger.info(f"Received request to retrieve duck with ID {duck_id}")
+
+            duck = Ducks.get_duck_by_id(duck_id)
+
+            if not duck:
+                app.logger.warning(f"Duck with ID {duck_id} not found.")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": f"Duck with ID {duck_id} not found"
+                }), 400)
+
+            app.logger.info(f"Successfully retrieved duck: {duck}")
+            return make_response(jsonify({
+                "status": "success",
+                "boxer": duck
+            }), 200)
+
+        except Exception as e:
+            app.logger.error(f"Error retrieving duck with ID {duck_id}: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while retrieving the duck",
+                "details": str(e)
+            }), 500)
 
 
-    # @app.route('/api/get-boxer-by-name/<string:boxer_name>', methods=['GET'])
-    # @login_required
-    # def get_boxer_by_name(boxer_name: str) -> Response:
-    #     """Route to get a boxer by its name.
-    #
-    #     Path Parameter:
-    #         - boxer_name (str): The name of the boxer.
-    #
-    #     Returns:
-    #         JSON response containing the boxer details if found.
-    #
-    #     Raises:
-    #         400 error if the boxer name is missing or not found.
-    #         500 error if there is an issue retrieving the boxer from the database.
-    #
-    #     """
-    #     try:
-    #         app.logger.info(f"Received request to retrieve boxer with name '{boxer_name}'")
-    #
-    #         boxer = Boxers.get_boxer_by_name(boxer_name)
-    #
-    #         if not boxer:
-    #             app.logger.warning(f"Boxer '{boxer_name}' not found.")
-    #             return make_response(jsonify({
-    #                 "status": "error",
-    #                 "message": f"Boxer '{boxer_name}' not found"
-    #             }), 400)
-    #
-    #         app.logger.info(f"Successfully retrieved boxer: {boxer}")
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "boxer": boxer
-    #         }), 200)
-    #
-    #     except Exception as e:
-    #         app.logger.error(f"Error retrieving boxer with name '{boxer_name}': {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while retrieving the boxer",
-    #             "details": str(e)
-    #         }), 500)
+    @app.route('/api/quack', methods=['GET'])
+    @login_required
+    def quack() -> Response:
+        """Route to get a random quack.
+
+        Returns:
+            JSON response with the duck quack url.
+
+        Raises:
+            500 error if there is an issue getting the duck to quack.
+
+        """
+        app.logger.info("Received quack request")
+
+        try:
+            url = Ducks.make_duck_quack()
+
+            app.logger.info(f"Duck quacked: {url}")
+            return make_response(jsonify({
+                "status": "success",
+                "message": f"Duck quacked successfully: '{url}'"
+            }), 201)
+
+        except Exception as e:
+            app.logger.error("Failed to get duck to quack")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while getting the duck to quack",
+                "details": str(e)
+            }), 500)
+
 
     @app.route('/api/ducks/favorites', methods=['GET'])
     @login_required
