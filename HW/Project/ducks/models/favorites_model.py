@@ -167,10 +167,18 @@ class FavoritesModel:
         Raises:
             ValueError: If the favorites is empty.
         """
-        
+
         if not self.favorites:
             logger.warning("Attempted to retrieve ducks from an empty favorites list.")
             raise ValueError("Favorites list is empty.")
         
         logger.info("Retrieving all ducks in favorites")
         return [self._get_duck_from_cache_or_db(duck_id) for duck_id in self.favorites]
+
+    def clear_cache(self):
+        """Clears the local TTL cache of ducks objects.
+
+        """
+        logger.info("Clearing local favorites cache in FavoritesModel.")
+        self._ducks_cache.clear()
+        self._ttl.clear()

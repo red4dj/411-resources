@@ -6,7 +6,7 @@ from config import ProductionConfig
 
 from ducks.db import db
 from ducks.models.ducks_model import Ducks
-from ducks.models.favorites_model import FavoritesModel as Favorites
+from ducks.models.favorites_model import FavoritesModel
 from ducks.models.user_model import Users
 from ducks.utils.logger import configure_logger
 
@@ -35,6 +35,8 @@ def create_app(config_class=ProductionConfig):
             "status": "error",
             "message": "Authentication required"
         }), 401)
+
+    Favorites = FavoritesModel()
 
     ####################################################
     #
@@ -459,6 +461,9 @@ def create_app(config_class=ProductionConfig):
 
             ducks = Favorites.get_ducks()
 
+            for i in range(len(ducks)):
+                ducks[i] = ducks[i].url
+
             app.logger.info(f"Retrieved {len(ducks)} duck(s).")
             return make_response(jsonify({
                 "status": "success",
@@ -528,7 +533,7 @@ def create_app(config_class=ProductionConfig):
             }), 200)
 
         except Exception as e:
-            app.logger.error(f"Failed to add duck to favorites")
+            app.logger.error(f"Failed to add duck to favorites: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "An internal error occurred while adding the duck to favorites",
@@ -590,7 +595,7 @@ def create_app(config_class=ProductionConfig):
             }), 200)
 
         except Exception as e:
-            app.logger.error(f"Failed to remove duck from favorites")
+            app.logger.error(f"Failed to remove duck from favorites: {e}")
             return make_response(jsonify({
                 "status": "error",
                 "message": "An internal error occurred while removing the duck from favorites",

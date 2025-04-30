@@ -65,7 +65,7 @@ def test_clear_favorites(favorites_model):
     """Test that clear_favorites empties favorites."""
     favorites_model.favorites = [1, 2]
     favorites_model.clear_favorites()
-    assert len(favorites_model.ring) == 0
+    assert len(favorites_model.favorites) == 0
 
 def test_clear_favorites_empty(favorites_model, caplog):
     """Test that clear_favorites logs a warning when already empty."""

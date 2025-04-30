@@ -73,35 +73,42 @@ def run_smoketest():
     # endregion
 
     # region GET DUCK
-    get_duck_resp = session.post(f"{base_url}/get-duck")
+    get_duck_resp = session.get(f"{base_url}/get-duck")
     assert get_duck_resp.status_code == 201
     assert get_duck_resp.json()["status"] == "success"
     print("Duck got getted")
     # endregion
 
-    # region SAVE DUCK
-    get_duck_resp = session.post(f"{base_url}/save-duck")
-    assert get_duck_resp.status_code == 201
+    # region FAVORITE DUCK
+    get_duck_resp = session.post(f"{base_url}/favorite-duck", json={"id": 1})
+    assert get_duck_resp.status_code == 200
     assert get_duck_resp.json()["status"] == "success"
     print("A Duck was saved!")
     # endregion
 
-    # region REMOVE DUCK
-    get_duck_resp = session.post(f"{base_url}/remove-duck")
-    assert get_duck_resp.status_code == 201
+    # region UNFAVORITE DUCK
+    get_duck_resp = session.post(f"{base_url}/unfavorite-duck", json={"id": 1})
+    assert get_duck_resp.status_code == 200
     assert get_duck_resp.json()["status"] == "success"
     print("We lost a duck...")
     # endregion
 
+    # region FAVORITE DUCK
+    get_duck_resp = session.post(f"{base_url}/favorite-duck", json={"id": 1})
+    assert get_duck_resp.status_code == 200
+    assert get_duck_resp.json()["status"] == "success"
+    print("The Duck has returned!")
+    # endregion
+
     # region LIST DUCKS
-    get_duck_resp = session.post(f"{base_url}/list-ducks")
-    assert get_duck_resp.status_code == 201
+    get_duck_resp = session.get(f"{base_url}/list-ducks")
+    assert get_duck_resp.status_code == 200
     assert get_duck_resp.json()["status"] == "success"
     print("Ducks were listed. You're a regular birdwatcher!")
     # endregion
 
     # region QUACK
-    get_duck_resp = session.post(f"{base_url}/quack")
+    get_duck_resp = session.get(f"{base_url}/quack")
     assert get_duck_resp.status_code == 201
     assert get_duck_resp.json()["status"] == "success"
     print("QUACK!")
@@ -115,7 +122,7 @@ def run_smoketest():
     # endregion
 
     # region NO AUTH
-    get_duck_logged_out_resp = session.post(f"{base_url}/get-duck")
+    get_duck_logged_out_resp = session.get(f"{base_url}/get-duck")
     # This should fail because we are logged out
     assert get_duck_logged_out_resp.status_code == 401
     assert get_duck_logged_out_resp.json()["status"] == "error"
