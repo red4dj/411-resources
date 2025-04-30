@@ -117,38 +117,9 @@ class Ducks(db.Model):
             logger.error(f"Database error while retrieving duck by ID {duck_id}: {e}")
             raise
 
-    @classmethod
-    def get_boxer_by_name(cls, name: str) -> "Ducks":
-        """Retrieve a boxer by name.
-
-        Args:
-            name: The name of the boxer.
-
-        Returns:
-            Boxer: The boxer instance.
-
-        Raises:
-            ValueError: If the boxer with the given name does not exist.
-
-        """
-        logger.info(f"Attempting to retrieve boxer: {name}")
-
-        try:
-            boxer = cls.query.filter_by(name=name.strip()).first()
-
-            if not boxer or boxer is None:
-                logger.info(f"Boxer '{name.strip()}' not found.")
-                raise ValueError(f"Boxer '{name.strip()}' not found.")
-
-            logger.info(f"Successfully retrieved boxer: {boxer.name}")
-            return boxer
-
-        except SQLAlchemyError as e:
-            logger.error(f"Database error while retrieving boxer: '{name}': {e}")
-            raise
 
     @classmethod
-    def delete(cls, duck_id: int) -> None:
+    def delete_duck(cls, duck_id: int) -> None:
         """Delete a duck by ID.
 
         Args:
