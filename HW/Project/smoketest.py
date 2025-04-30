@@ -2,6 +2,8 @@ import requests
 
 
 def run_smoketest():
+    """Run sequential smoketests."""
+
     # region BASE
     base_url = "http://localhost:5000/api"
     username = "test"
@@ -119,6 +121,7 @@ def run_smoketest():
     assert get_duck_logged_out_resp.json()["status"] == "error"
     print("Duck get failed as expected")
     # endregion
+
 
 if __name__ == "__main__":
     run_smoketest()

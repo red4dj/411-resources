@@ -16,8 +16,7 @@ SOUND_TOKEN = os.getenv("SOUND_TOKEN")
 
 
 def get_duck() -> str:
-    """
-    Fetches a random duck.
+    """Fetches a random duck.
 
     Returns:
         str: The url of the image.
@@ -25,8 +24,8 @@ def get_duck() -> str:
     Raises:
         ValueError: If the response from random-d.uck is not a valid result.
         RuntimeError: If the request to random-d.uck fails due to a timeout or other request-related error.
-
     """
+
     try:
         logger.info(f"Fetching random duck from {RANDOM_DUCK_URL}")
 
@@ -56,8 +55,7 @@ def get_duck() -> str:
 
 
 def get_quack() -> str:
-    """
-    Fetches a random quack.
+    """Fetches a random quack.
 
     Returns:
         str: The url of the quack.
@@ -65,8 +63,8 @@ def get_quack() -> str:
     Raises:
         ValueError: If the response from freesound.org is not a valid result.
         RuntimeError: If the request to freesound.org fails due to a timeout or other request-related error.
-
     """
+
     try:
         logger.info(f"Fetching random quack from {SOUND_QUACK_URL}")
 

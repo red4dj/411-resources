@@ -1,5 +1,4 @@
 import logging
-import math
 import os
 import time
 from typing import List
@@ -13,7 +12,7 @@ configure_logger(logger)
 
 
 class FavoritesModel:
-    """A class to manage the the saved favorite ducks of a user.
+    """A class to manage the saved favorite ducks of a user.
 
     """
 
@@ -28,13 +27,11 @@ class FavoritesModel:
             _ducks_cache (dict[int, Ducks]): A cache to store duck objects for quick access.
             _ttl (dict[int, float]): A cache to store the time-to-live for each duck.
             ttl_seconds (int): The time-to-live in seconds for the cached duck objects.
-
         """
         self.favorites: List[int] = []
         self._ducks_cache: dict[int, Ducks] = {}
         self._ttl: dict[int, float] = {}
         self.ttl_seconds = int(os.getenv("TTL", 60))
-
 
     def _get_duck_from_cache_or_db(self, duck_id: int) -> Ducks:
         """
@@ -52,6 +49,7 @@ class FavoritesModel:
         Raises:
             ValueError: If the duck cannot be found in the database.
         """
+
         now = time.time()
 
         if duck_id in self._ducks_cache and self._ttl.get(duck_id, 0) > now:
@@ -69,15 +67,13 @@ class FavoritesModel:
         self._ttl[duck_id] = now + self.ttl_seconds
         return duck
 
-
     def clear_favorites(self):
         """Clears the list of favorite ducks.
 
         Clears all ducks from favorites. If the favorites list is empty, a warning is logged.
-
         """
 
-        logger.info("Received reques to clear the favorites list.")
+        logger.info("Received request to clear the favorites list.")
 
         if not self.favorites:
             logger.warning("Attempted to clear an empty favorites list.")
@@ -93,8 +89,8 @@ class FavoritesModel:
 
         Raises:
             ValueError: If favorites is empty or the duck ID is invalid.
-
         """
+
         logger.info(f"Received request to remove duck with ID {duck_id}")
 
         if not self.favorites:
@@ -104,7 +100,6 @@ class FavoritesModel:
         if not duck_id or not isinstance(duck_id, int):
             logger.error(f"Invalid duck ID: {duck_id}")
             raise ValueError("Invalid duck ID.")
-        
 
         if duck_id not in self.favorites:
             logger.warning(f"Duck with ID {duck_id} not found in favorites")
@@ -112,7 +107,6 @@ class FavoritesModel:
 
         self.favorites.remove(duck_id)
         logger.info(f"Successfully removed duck with ID {duck_id} from favorites.")
-
 
     def add_duck_to_favorites(self, duck_id: int):
         """
@@ -129,7 +123,6 @@ class FavoritesModel:
             logger.error(f"Duck with ID {duck_id} already exists in favorites")
             raise ValueError(f"Duck with ID {duck_id} already exists in favorites")
 
-
         try:
             duck = self._get_duck_from_cache_or_db(duck_id)
         except ValueError as e:
@@ -138,7 +131,6 @@ class FavoritesModel:
 
         logger.info(f"Adding duck '{duck.url}' (ID {duck_id}) to favorites.")
         self.favorites.append(duck_id)
-
 
     def get_duck_by_duck_id(self, duck_id: int) -> Ducks:
         """Retrieves a duck from favorites by its duck ID using the cache or DB.
@@ -152,6 +144,7 @@ class FavoritesModel:
         Raises:
             ValueError: If favorites is empty or the duck is not found.
         """
+
         if not self.favorites:
             logger.warning("Attempted to retrieve a duck from an empty favorites list.")
             raise ValueError("Favorites list is empty.")
@@ -165,7 +158,6 @@ class FavoritesModel:
         logger.info(f"Successfully retrieved duck: {duck.url}")
         return duck
 
-
     def get_ducks(self) -> List[Ducks]:
         """Returns a list of all ducks in favorites using cached duck data.
 
@@ -175,11 +167,10 @@ class FavoritesModel:
         Raises:
             ValueError: If the favorites is empty.
         """
+        
         if not self.favorites:
             logger.warning("Attempted to retrieve ducks from an empty favorites list.")
             raise ValueError("Favorites list is empty.")
         
         logger.info("Retrieving all ducks in favorites")
         return [self._get_duck_from_cache_or_db(duck_id) for duck_id in self.favorites]
-
-    
