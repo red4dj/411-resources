@@ -8,6 +8,7 @@ from config import ProductionConfig
 
 from ducks.db import db
 from ducks.models.ducks_model import Ducks
+from ducks.models.favorites_model import FavoritesModel as Favorites
 from ducks.models.user_model import Users
 from ducks.utils.logger import configure_logger
 
@@ -439,23 +440,164 @@ def create_app(config_class=ProductionConfig):
             }), 500)
 
 
-    @app.route('/api/ducks/favorites', methods=['GET'])
+    @app.route('/api/list-ducks', methods=['GET'])
     @login_required
-    def get_favorite_ducks() -> Response:
-        """Get all favorite duck images for the current user.
-        
-        Returns:
-            JSON response with list of favorite duck URLs.
-        """
-        # This is a placeholder - your teammates will implement the model
-        # For now, just return an empty list
-        app.logger.info("Returning favorite ducks (placeholder)")
-        return make_response(jsonify({
-            "status": "success",
-            "favorites": []
-        }), 200)
+    def list_ducks() -> Response:
+        """Route to get list of favorite ducks
 
-    return app  # This is the end of the create_app function
+        Returns:
+            JSON response with the list of ducks.
+
+        Raises:
+            500 error if there is an issue getting the ducks.
+
+        """
+        try:
+            app.logger.info("Retrieving list of favorite ducks...")
+
+            ducks = Favorites.get_ducks()
+
+            app.logger.info(f"Retrieved {len(ducks)} duck(s).")
+            return make_response(jsonify({
+                "status": "success",
+                "ducks": ducks
+            }), 200)
+
+        except Exception as e:
+            app.logger.error(f"Failed to retrieve ducks: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while retrieving ducks",
+                "details": str(e)
+            }), 500)
+
+
+    @app.route('/api/favorite-duck', methods=['POST'])
+    @login_required
+    def add_duck_to_favorites() -> Response:
+        """Route to add a duck to list of favorites.
+
+        Expected JSON Input:
+            - id (str): The duck's id.
+
+        Returns:
+            JSON response indicating the success of the duck being favorite.
+
+        Raises:
+            400 error if the request is invalid.
+            500 error if there is an issue with the duck being favorite.
+
+        """
+        try:
+            data = request.get_json()
+            duck_id = data.get("id")
+
+            if not duck_id:
+                app.logger.warning("Attempted to favorite duck without specifying an id.")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "You must provide a duck id"
+                }), 400)
+
+            app.logger.info(f"Attempting to favorite duck ID: {duck_id}")
+
+            duck = Ducks.get_duck_by_id(duck_id)
+
+            if not duck:
+                app.logger.warning(f"Duck ID {duck_id} not found.")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": f"Duck ID {duck_id} not found."
+                }), 400)
+
+            try:
+                Favorites.add_duck_to_favorites(duck_id)
+            except ValueError as e:
+                app.logger.warning(f"Cannot favorite ID: {duck_id}: {e}")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": str(e)
+                }), 400)
+
+            app.logger.info(f"Duck ID {duck_id} added to favorites.")
+
+            return make_response(jsonify({
+                "status": "success",
+                "message": f"Duck ID {duck_id} added to favorites."
+            }), 200)
+
+        except Exception as e:
+            app.logger.error(f"Failed to add duck to favorites")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while adding the duck to favorites",
+                "details": str(e)
+            }), 500)
+
+
+    @app.route('/api/unfavorite-duck', methods=['POST'])
+    @login_required
+    def remove_duck_from_favorites() -> Response:
+        """Route to remove a duck from list of favorites.
+
+        Expected JSON Input:
+            - id (str): The duck's id.
+
+        Returns:
+            JSON response indicating the success of the duck no longer being favorite.
+
+        Raises:
+            400 error if the request is invalid.
+            500 error if there is an issue with the duck not being favorite.
+
+        """
+        try:
+            data = request.get_json()
+            duck_id = data.get("id")
+
+            if not duck_id:
+                app.logger.warning("Attempted to unfavorite duck without specifying an id.")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": "You must provide a duck id"
+                }), 400)
+
+            app.logger.info(f"Attempting to unfavorite duck ID: {duck_id}")
+
+            duck = Favorites.get_duck_by_duck_id(duck_id)
+
+            if not duck:
+                app.logger.warning(f"Duck ID {duck_id} not found in favorites.")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": f"Duck ID {duck_id} not found in favorites."
+                }), 400)
+
+            try:
+                Favorites.remove_duck_by_duck_id(duck_id)
+            except ValueError as e:
+                app.logger.warning(f"Cannot unfavorite ID: {duck_id}: {e}")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": str(e)
+                }), 400)
+
+            app.logger.info(f"Duck ID {duck_id} removed from favorites.")
+
+            return make_response(jsonify({
+                "status": "success",
+                "message": f"Duck ID {duck_id} removed from favorites."
+            }), 200)
+
+        except Exception as e:
+            app.logger.error(f"Failed to remove duck from favorites")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while removing the duck from favorites",
+                "details": str(e)
+            }), 500)
+
+    return app
 
 if __name__ == '__main__':
     app = create_app()
@@ -463,6 +605,6 @@ if __name__ == '__main__':
     try:
         app.run(debug=True, host='0.0.0.0', port=5000)
     except Exception as e:
-        app.logger.error(f"Flask app encountered a quack: {e}")
+        app.logger.error(f"Flask Ducks encountered a predator: {e}")
     finally:
-        app.logger.info("Flask app has stopped.")
+        app.logger.info("Duck has died.")
