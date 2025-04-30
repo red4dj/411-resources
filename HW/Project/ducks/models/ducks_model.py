@@ -18,7 +18,7 @@ class Ducks(db.Model):
     Used in a Flask-SQLAlchemy application to manage duck data for favorites.
 
     """
-    __tablename__ = "Boxers"
+    __tablename__ = "Ducks"
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     url = db.Column(db.String, nullable=False)
@@ -52,7 +52,7 @@ class Ducks(db.Model):
             url: The URL of the duck image.
 
         Raises:
-            IntegrityError: If a boxer with the same URL already exists.
+            IntegrityError: If a duck with the same URL already exists.
             ValueError: If the input parameters are invalid.
             SQLAlchemyError: If there is a database error during creation.
 
@@ -69,7 +69,7 @@ class Ducks(db.Model):
             logger.warning(f"Validation failed: {e}")
             raise
 
-        # Check for existing boxer with same name
+        # Check for existing duck with same url
         existing = Ducks.query.filter_by(url=url.strip()).first()
         if existing:
             logger.error(f"Duck already exists: {url.strip()}")
