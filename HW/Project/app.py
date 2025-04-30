@@ -1,7 +1,5 @@
-from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, Response, request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-import requests  # Add this line
 # from flask_cors import CORS
 
 from config import ProductionConfig
@@ -46,8 +44,7 @@ def create_app(config_class=ProductionConfig):
 
     @app.route('/api/health', methods=['GET'])
     def healthcheck() -> Response:
-        """
-        Health check route to verify the service is running.
+        """Health check route to verify the service is running.
 
         Returns:
             JSON response indicating the health status of the service.
@@ -482,7 +479,7 @@ def create_app(config_class=ProductionConfig):
         """Route to add a duck to list of favorites.
 
         Expected JSON Input:
-            - id (str): The duck's id.
+            - id (int): The duck's id.
 
         Returns:
             JSON response indicating the success of the duck being favorite.
@@ -544,7 +541,7 @@ def create_app(config_class=ProductionConfig):
         """Route to remove a duck from list of favorites.
 
         Expected JSON Input:
-            - id (str): The duck's id.
+            - id (int): The duck's id.
 
         Returns:
             JSON response indicating the success of the duck no longer being favorite.
