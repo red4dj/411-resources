@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from ducks.db import db
 from ducks.utils.logger import configure_logger
 from ducks.utils.api_utils import get_duck
+from ducks.utils.api_utils import get_quack
 
 
 logger = logging.getLogger(__name__)
@@ -139,4 +140,15 @@ class Ducks(db.Model):
         db.session.delete(duck)
         db.session.commit()
         logger.info(f"Duck with ID {duck_id} permanently deleted.")
+
+    def make_duck_quack(self) -> str:
+        """Returns the URL of the quack sound.
+
+        Returns:
+            str: The URL of the quack.
+
+        """
+        quack = get_quack()
+        logger.info(f"Quack sound URL: {quack}")
+        return quack
 
