@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from ducks.db import db
 from ducks.utils.logger import configure_logger
+from ducks.utils.api_utils import get_duck
 
 
 logger = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ class Ducks(db.Model):
 
 
     @classmethod
-    def create_duck(cls, url: str) -> None:
+    def create_duck(cls) -> None:
         """Create and persist a new Duck instance.
 
         Args:
@@ -57,6 +58,8 @@ class Ducks(db.Model):
             SQLAlchemyError: If there is a database error during creation.
 
         """
+
+        url = get_duck()
         logger.info(f"Creating Duck: {url}")
 
         try:
