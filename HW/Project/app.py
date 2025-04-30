@@ -396,7 +396,8 @@ def create_app(config_class=ProductionConfig):
             app.logger.info(f"Successfully retrieved duck: {duck}")
             return make_response(jsonify({
                 "status": "success",
-                "boxer": duck
+                "id": duck.id,
+                "url": duck.url
             }), 200)
 
         except Exception as e:
@@ -427,7 +428,8 @@ def create_app(config_class=ProductionConfig):
             app.logger.info(f"Duck quacked: {url}")
             return make_response(jsonify({
                 "status": "success",
-                "message": f"Duck quacked successfully: '{url}'"
+                "message": f"Duck quacked successfully!",
+                "url": url
             }), 201)
 
         except Exception as e:
@@ -462,7 +464,7 @@ def create_app(config_class=ProductionConfig):
             ducks = Favorites.get_ducks()
 
             for i in range(len(ducks)):
-                ducks[i] = ducks[i].url
+                ducks[i] = {"id": ducks[0].id, "url": ducks[i].url}
 
             app.logger.info(f"Retrieved {len(ducks)} duck(s).")
             return make_response(jsonify({
