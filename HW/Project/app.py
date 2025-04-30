@@ -38,7 +38,6 @@ def create_app(config_class=ProductionConfig):
             "message": "Authentication required"
         }), 401)
 
-
     ####################################################
     #
     # Healthchecks
@@ -52,14 +51,13 @@ def create_app(config_class=ProductionConfig):
 
         Returns:
             JSON response indicating the health status of the service.
-
         """
+
         app.logger.info("Health check endpoint hit")
         return make_response(jsonify({
             'status': 'success',
             'message': 'Quack!'
         }), 200)
-
 
     ##########################################################
     #
@@ -82,6 +80,7 @@ def create_app(config_class=ProductionConfig):
             400 error if the username or password is missing.
             500 error if there is an issue creating the user in the database.
         """
+
         try:
             data = request.get_json()
             username = data.get("username")
@@ -126,6 +125,7 @@ def create_app(config_class=ProductionConfig):
         Raises:
             401 error if the username or password is incorrect.
         """
+
         try:
             data = request.get_json()
             username = data.get("username")
@@ -172,6 +172,7 @@ def create_app(config_class=ProductionConfig):
             JSON response indicating the success of the logout operation.
 
         """
+
         logout_user()
         return make_response(jsonify({
             "status": "success",
@@ -193,6 +194,7 @@ def create_app(config_class=ProductionConfig):
             400 error if the new password is not provided.
             500 error if there is an issue updating the password in the database.
         """
+
         try:
             data = request.get_json()
             new_password = data.get("new_password")
@@ -233,6 +235,7 @@ def create_app(config_class=ProductionConfig):
         Raises:
             500 error if there is an issue recreating the Users table.
         """
+
         try:
             app.logger.info("Received request to recreate Users table")
             with app.app_context():
@@ -252,7 +255,6 @@ def create_app(config_class=ProductionConfig):
                 "details": str(e)
             }), 500)
 
-
     ##########################################################
     #
     # Ducks
@@ -269,6 +271,7 @@ def create_app(config_class=ProductionConfig):
         Raises:
             500 error if there is an issue recreating the Ducks table.
         """
+
         try:
             app.logger.info("Received request to recreate Ducks table")
             with app.app_context():
@@ -298,8 +301,8 @@ def create_app(config_class=ProductionConfig):
 
         Raises:
             500 error if there is an issue getting the duck.
-
         """
+
         app.logger.info("Received request for new duck")
 
         try:
@@ -319,7 +322,6 @@ def create_app(config_class=ProductionConfig):
                 "details": str(e)
             }), 500)
 
-
     @app.route('/api/delete-duck/<int:duck_id>', methods=['DELETE'])
     @login_required
     def delete_duck(duck_id: int) -> Response:
@@ -334,8 +336,8 @@ def create_app(config_class=ProductionConfig):
         Raises:
             400 error if the duck does not exist.
             500 error if there is an issue removing the duck from the database.
-
         """
+
         try:
             app.logger.info(f"Received request to delete duck with ID {duck_id}")
 
@@ -364,7 +366,6 @@ def create_app(config_class=ProductionConfig):
                 "details": str(e)
             }), 500)
 
-
     @app.route('/api/get-duck-by-id/<int:duck_id>', methods=['GET'])
     @login_required
     def get_duck_by_id(duck_id: int) -> Response:
@@ -379,8 +380,8 @@ def create_app(config_class=ProductionConfig):
         Raises:
             400 error if the boxer is not found.
             500 error if there is an issue retrieving the boxer from the database.
-
         """
+
         try:
             app.logger.info(f"Received request to retrieve duck with ID {duck_id}")
 
@@ -407,7 +408,6 @@ def create_app(config_class=ProductionConfig):
                 "details": str(e)
             }), 500)
 
-
     @app.route('/api/quack', methods=['GET'])
     @login_required
     def quack() -> Response:
@@ -418,8 +418,8 @@ def create_app(config_class=ProductionConfig):
 
         Raises:
             500 error if there is an issue getting the duck to quack.
-
         """
+
         app.logger.info("Received quack request")
 
         try:
@@ -439,6 +439,11 @@ def create_app(config_class=ProductionConfig):
                 "details": str(e)
             }), 500)
 
+    ##########################################################
+    #
+    # Favorite Ducks
+    #
+    ##########################################################
 
     @app.route('/api/list-ducks', methods=['GET'])
     @login_required
@@ -450,8 +455,8 @@ def create_app(config_class=ProductionConfig):
 
         Raises:
             500 error if there is an issue getting the ducks.
-
         """
+
         try:
             app.logger.info("Retrieving list of favorite ducks...")
 
@@ -471,7 +476,6 @@ def create_app(config_class=ProductionConfig):
                 "details": str(e)
             }), 500)
 
-
     @app.route('/api/favorite-duck', methods=['POST'])
     @login_required
     def add_duck_to_favorites() -> Response:
@@ -486,8 +490,8 @@ def create_app(config_class=ProductionConfig):
         Raises:
             400 error if the request is invalid.
             500 error if there is an issue with the duck being favorite.
-
         """
+
         try:
             data = request.get_json()
             duck_id = data.get("id")
@@ -534,7 +538,6 @@ def create_app(config_class=ProductionConfig):
                 "details": str(e)
             }), 500)
 
-
     @app.route('/api/unfavorite-duck', methods=['POST'])
     @login_required
     def remove_duck_from_favorites() -> Response:
@@ -549,8 +552,8 @@ def create_app(config_class=ProductionConfig):
         Raises:
             400 error if the request is invalid.
             500 error if there is an issue with the duck not being favorite.
-
         """
+
         try:
             data = request.get_json()
             duck_id = data.get("id")
@@ -598,6 +601,7 @@ def create_app(config_class=ProductionConfig):
             }), 500)
 
     return app
+
 
 if __name__ == '__main__':
     app = create_app()
