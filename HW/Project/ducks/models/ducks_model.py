@@ -12,12 +12,10 @@ configure_logger(logger)
 
 
 class Ducks(db.Model):
-    """Represents a competitive boxer in the system.
+    """Represents a duck image in the system.
 
-    This model maps to the 'boxers' table in the database and stores personal
-    and performance-related attributes such as name, weight, height, reach,
-    age, and fight statistics. Used in a Flask-SQLAlchemy application to
-    manage boxer data, run simulations, and track fight outcomes.
+    This model maps to the 'ducks' table in the database and stores the urls of the duck image. 
+    Used in a Flask-SQLAlchemy application to manage duck data for favorites.
 
     """
     __tablename__ = "Boxers"
@@ -120,7 +118,7 @@ class Ducks(db.Model):
             raise
 
     @classmethod
-    def get_boxer_by_name(cls, name: str) -> "Boxers":
+    def get_boxer_by_name(cls, name: str) -> "Ducks":
         """Retrieve a boxer by name.
 
         Args:
@@ -168,68 +166,3 @@ class Ducks(db.Model):
         db.session.commit()
         logger.info(f"Duck with ID {duck_id} permanently deleted.")
 
-    def update_stats(self, result: str) -> None:
-        """Update the boxer's fight and win count based on result.
-
-        Args:
-            result: The result of the fight ('win' or 'loss').
-
-        Raises:
-            ValueError: If the result is not 'win' or 'loss'.
-            ValueError: If the number of wins exceeds the number of fights.
-
-        """
-        if result not in {"win", "loss"}:
-            raise ValueError("Result must be 'win' or 'loss'.")
-
-        self.fights += 1
-        if result == "win":
-            self.wins += 1
-
-        if self.wins > self.fights:
-            raise ValueError("Wins cannot exceed number of fights.")
-
-        db.session.commit()
-        logger.info(f"Updated stats for boxer {self.name}: {self.fights} fights, {self.wins} wins.")
-
-    @staticmethod
-    def get_leaderboard(sort_by: str = "wins") -> List[dict]:
-        """Retrieve a sorted leaderboard of boxers.
-
-        Args:
-            sort_by (str): Either "wins" or "win_pct".
-
-        Returns:
-            List[Dict]: List of boxers with stats and win percentage.
-
-        Raises:
-            ValueError: If the sort_by parameter is not valid.
-
-        """
-        logger.info(f"Retrieving leaderboard. Sort by: {sort_by}")
-
-        if sort_by not in {"wins", "win_pct"}:
-            logger.error(f"Invalid sort_by parameter: {sort_by}")
-            raise ValueError(f"Invalid sort_by parameter: {sort_by}")
-
-        boxers = Boxers.query.filter(Boxers.fights > 0).all()
-
-        def compute_win_pct(b: Boxers) -> float:
-            return round((b.wins / b.fights) * 100, 1) if b.fights > 0 else 0.0
-
-        leaderboard = [{
-            "id": b.id,
-            "name": b.name,
-            "weight": b.weight,
-            "height": b.height,
-            "reach": b.reach,
-            "age": b.age,
-            "weight_class": b.weight_class,
-            "fights": b.fights,
-            "wins": b.wins,
-            "win_pct": compute_win_pct(b)
-        } for b in boxers]
-
-        leaderboard.sort(key=lambda b: b[sort_by], reverse=True)
-        logger.info("Leaderboard retrieved successfully.")
-        return leaderboard
