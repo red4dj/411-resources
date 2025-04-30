@@ -45,8 +45,11 @@ class Ducks(db.Model):
             raise ValueError("URL must be a non-empty string.")
 
     @classmethod
-    def create_duck(cls) -> None:
+    def create_duck(cls) -> str:
         """Create and persist a new Duck instance.
+
+        Returns:
+            str: The duck url
 
         Raises:
             IntegrityError: If a duck with the same URL already exists.
@@ -77,6 +80,7 @@ class Ducks(db.Model):
             db.session.add(duck)
             db.session.commit()
             logger.info(f"Duck created successfully: {url}")
+            return url
         except IntegrityError:
             logger.error(f"Duck at '{url}' already exists.")
             db.session.rollback()
