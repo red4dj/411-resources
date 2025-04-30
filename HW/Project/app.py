@@ -1,17 +1,16 @@
 from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, Response, request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+import requests  # Add this line
 # from flask_cors import CORS
 
 from config import ProductionConfig
 
 from ducks.db import db
-from ducks.models.ducks_model import Boxers
+from ducks.models.ducks_model import Ducks as Boxers  # Change this line
 from ducks.models.user_model import Users
 from ducks.utils.logger import configure_logger
 
-
-load_dotenv()
 
 def create_app(config_class=ProductionConfig):
     app = Flask(__name__)
@@ -492,6 +491,134 @@ def create_app(config_class=ProductionConfig):
                 "details": str(e)
             }), 500)
 
+
+        
+    ##########################################################
+    #
+    # Duck API
+    #
+    ##########################################################
+
+    @app.route('/api/ducks/random', methods=['GET'])
+    @login_required  # Remove this if you want public access
+    def get_random_duck() -> Response:
+        """Get a random duck image.
+        
+        Query Parameters:
+            - type (optional): Filter for image type ('JPG' or 'GIF')
+            
+        Returns:
+            JSON response with the duck image URL and message.
+        """
+        image_type = request.args.get('type')
+        endpoint = "https://random-d.uk/api/v2/random"
+        
+        params = {}
+        if image_type and image_type.upper() in ["JPG", "GIF"]:
+            params["type"] = image_type.upper()
+            
+        try:
+            app.logger.info(f"Fetching random duck image with params: {params}")
+            response = requests.get(endpoint, params=params)
+            response.raise_for_status()
+            return make_response(jsonify(response.json()), 200)
+        except Exception as e:
+            app.logger.error(f"Error fetching random duck: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "Failed to fetch duck image",
+                "details": str(e)
+            }), 500)
+
+    @app.route('/api/ducks/quack', methods=['GET'])
+    @login_required  # Remove this if you want public access
+    def get_quack() -> Response:
+        """Get a random duck image using the quack endpoint.
+        
+        Returns:
+            JSON response with the duck image URL and message.
+        """
+        endpoint = "https://random-d.uk/api/v2/quack"
+        
+        try:
+            app.logger.info("Fetching quack duck image")
+            response = requests.get(endpoint)
+            response.raise_for_status()
+            return make_response(jsonify(response.json()), 200)
+        except Exception as e:
+            app.logger.error(f"Error fetching quack duck: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "Failed to fetch duck image",
+                "details": str(e)
+            }), 500)
+
+    @app.route('/api/ducks/list', methods=['GET'])
+    @login_required  # Remove this if you want public access
+    def get_duck_list() -> Response:
+        """Get list of all available duck images.
+        
+        Returns:
+            JSON response with lists of images and gifs.
+        """
+        endpoint = "https://random-d.uk/api/v2/list"
+        
+        try:
+            app.logger.info("Fetching duck image list")
+            response = requests.get(endpoint)
+            response.raise_for_status()
+            return make_response(jsonify(response.json()), 200)
+        except Exception as e:
+            app.logger.error(f"Error fetching duck list: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "Failed to fetch duck image list",
+                "details": str(e)
+            }), 500)
+
+    @app.route('/api/ducks/http/<int:status_code>', methods=['GET'])
+    @login_required  # Remove this if you want public access
+    def get_http_duck(status_code: int) -> Response:
+        """Get a duck image representing an HTTP status code.
+        
+        Path Parameters:
+            - status_code: HTTP status code (100-599)
+            
+        Returns:
+            JSON response with the URL for the HTTP duck image.
+        """
+        if not isinstance(status_code, int) or status_code < 100 or status_code >= 600:
+            app.logger.warning(f"Invalid HTTP status code: {status_code}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": f"Invalid HTTP status code: {status_code}"
+            }), 400)
+            
+        url = f"https://random-d.uk/api/v2/http/{status_code}"
+        app.logger.info(f"Returning HTTP {status_code} duck image")
+        return make_response(jsonify({
+            "status": "success",
+            "url": url,
+            "message": f"HTTP {status_code} Duck"
+        }), 200)
+
+    @app.route('/api/ducks/favorites', methods=['GET'])
+    @login_required
+    def get_favorite_ducks() -> Response:
+        """Get all favorite duck images for the current user.
+        
+        Returns:
+            JSON response with list of favorite duck URLs.
+        """
+        # This is a placeholder - your teammates will implement the model
+        # For now, just return an empty list
+        app.logger.info("Returning favorite ducks (placeholder)")
+        return make_response(jsonify({
+            "status": "success",
+            "favorites": []
+        }), 200)
+
+    return app  # This is the end of the create_app function
 
 if __name__ == '__main__':
     app = create_app()
