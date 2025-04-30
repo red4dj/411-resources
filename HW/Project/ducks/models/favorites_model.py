@@ -6,7 +6,6 @@ from typing import List
 
 from ducks.models.ducks_model import Ducks
 from ducks.utils.logger import configure_logger
-from ducks.utils.api_utils import get_random
 
 
 logger = logging.getLogger(__name__)
