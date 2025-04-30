@@ -7,7 +7,7 @@ import requests  # Add this line
 from config import ProductionConfig
 
 from ducks.db import db
-from ducks.models.ducks_model import Ducks as Boxers  # Change this line
+from ducks.models.ducks_model import Ducks
 from ducks.models.user_model import Users
 from ducks.utils.logger import configure_logger
 
@@ -38,13 +38,11 @@ def create_app(config_class=ProductionConfig):
         }), 401)
 
 
-
     ####################################################
     #
     # Healthchecks
     #
     ####################################################
-
 
     @app.route('/api/health', methods=['GET'])
     def healthcheck() -> Response:
@@ -253,354 +251,203 @@ def create_app(config_class=ProductionConfig):
                 "details": str(e)
             }), 500)
 
+
     ##########################################################
     #
     # Boxers
     #
     ##########################################################
 
-    @app.route('/api/reset-boxers', methods=['DELETE'])
-    def reset_boxers() -> Response:
-        """Recreate the boxers table to delete boxers users.
+    @app.route('/api/reset-ducks', methods=['DELETE'])
+    def reset_ducks() -> Response:
+        """Recreate the ducks table to delete ducks.
 
         Returns:
-            JSON response indicating the success of recreating the Boxers table.
+            JSON response indicating the success of recreating the Ducks table.
 
         Raises:
-            500 error if there is an issue recreating the Boxers table.
+            500 error if there is an issue recreating the Ducks table.
         """
         try:
-            app.logger.info("Received request to recreate Boxers table")
+            app.logger.info("Received request to recreate Ducks table")
             with app.app_context():
-                Boxers.__table__.drop(db.engine)
-                Boxers.__table__.create(db.engine)
-            app.logger.info("Boxers table recreated successfully")
+                Ducks.__table__.drop(db.engine)
+                Ducks.__table__.create(db.engine)
+            app.logger.info("Ducks table recreated successfully")
             return make_response(jsonify({
                 "status": "success",
-                "message": f"Boxers table recreated successfully"
+                "message": "Ducks table recreated successfully"
             }), 200)
 
         except Exception as e:
-            app.logger.error(f"Boxers table recreation failed: {e}")
+            app.logger.error(f"Ducks table recreation failed: {e}")
             return make_response(jsonify({
                 "status": "error",
-                "message": "An internal error occurred while deleting users",
+                "message": "An internal error occurred while deleting ducks",
                 "details": str(e)
             }), 500)
 
-
-    @app.route('/api/add-boxer', methods=['POST'])
+    @app.route('/api/get-duck', methods=['GET'])
     @login_required
-    def add_boxer() -> Response:
-        """Route to add a new boxer to the gym.
-
-        Expected JSON Input:
-            - name (str): The boxer's name.
-            - weight (int): The boxer's weight.
-            - height (int): The boxer's height.
-            - reach (float): The boxer's reach in inches.
-            - age (int): The boxer's age.
+    def get_duck() -> Response:
+        """Route to get a random duck.
 
         Returns:
-            JSON response indicating the success of the boxer addition.
+            JSON response with the duck image url.
 
         Raises:
-            400 error if input validation fails.
-            500 error if there is an issue adding the boxer to the database.
+            500 error if there is an issue getting the duck.
 
         """
-        app.logger.info("Received request to create new boxer")
+        app.logger.info("Received request for new duck")
 
         try:
-            data = request.get_json()
+            url = Ducks.create_duck()
 
-            required_fields = ["name", "weight", "height", "reach", "age"]
-            missing_fields = [field for field in required_fields if field not in data]
-
-            if missing_fields:
-                app.logger.warning(f"Missing required fields: {missing_fields}")
-                return make_response(jsonify({
-                    "status": "error",
-                    "message": f"Missing required fields: {', '.join(missing_fields)}"
-                }), 400)
-
-            name = data["name"]
-            weight = data["weight"]
-            height = data["height"]
-            reach = data["reach"]
-            age = data["age"]
-
-            if (
-                not isinstance(name, str)
-                or not isinstance(weight, (int, float))
-                or not isinstance(height, (int, float))
-                or not isinstance(reach, (int, float))
-                or not isinstance(age, int)
-            ):
-                app.logger.warning("Invalid input data types")
-                return make_response(jsonify({
-                    "status": "error",
-                    "message": "Invalid input types: name should be a string, weight/height/reach should be numbers, age should be an integer"
-                }), 400)
-
-            app.logger.info(f"Adding boxer: {name}, {weight}kg, {height}cm, {reach} inches, {age} years old")
-            Boxers.create_boxer(name, weight, height, reach, age)
-
-            app.logger.info(f"Boxer added successfully: {name}")
+            app.logger.info(f"Duck added successfully: {url}")
             return make_response(jsonify({
                 "status": "success",
-                "message": f"Boxer '{name}' added successfully"
+                "message": f"Duck '{url}' added successfully"
             }), 201)
 
         except Exception as e:
-            app.logger.error(f"Failed to add boxer: {e}")
+            app.logger.error(f"Failed to get duck: {e}")
             return make_response(jsonify({
                 "status": "error",
-                "message": "An internal error occurred while adding the boxer",
+                "message": "An internal error occurred while getting the duck",
                 "details": str(e)
             }), 500)
 
 
-    @app.route('/api/delete-boxer/<int:boxer_id>', methods=['DELETE'])
-    @login_required
-    def delete_boxer(boxer_id: int) -> Response:
-        """Route to delete a boxer by ID.
-
-        Path Parameter:
-            - boxer_id (int): The ID of the boxer to delete.
-
-        Returns:
-            JSON response indicating success of the operation.
-
-        Raises:
-            400 error if the boxer does not exist.
-            500 error if there is an issue removing the boxer from the database.
-
-        """
-        try:
-            app.logger.info(f"Received request to delete boxer with ID {boxer_id}")
-
-            # Check if the boxer exists before attempting to delete
-            boxer = Boxers.get_boxer_by_id(boxer_id)
-            if not boxer:
-                app.logger.warning(f"Boxer with ID {boxer_id} not found.")
-                return make_response(jsonify({
-                    "status": "error",
-                    "message": f"Boxer with ID {boxer_id} not found"
-                }), 400)
-
-            Boxers.delete_boxer(boxer_id)
-            app.logger.info(f"Successfully deleted boxer with ID {boxer_id}")
-
-            return make_response(jsonify({
-                "status": "success",
-                "message": f"Boxer with ID {boxer_id} deleted successfully"
-            }), 200)
-
-        except Exception as e:
-            app.logger.error(f"Failed to add boxer: {e}")
-            return make_response(jsonify({
-                "status": "error",
-                "message": "An internal error occurred while deleting the boxer",
-                "details": str(e)
-            }), 500)
-
-
-    @app.route('/api/get-boxer-by-id/<int:boxer_id>', methods=['GET'])
-    @login_required
-    def get_boxer_by_id(boxer_id: int) -> Response:
-        """Route to get a boxer by its ID.
-
-        Path Parameter:
-            - boxer_id (int): The ID of the boxer.
-
-        Returns:
-            JSON response containing the boxer details if found.
-
-        Raises:
-            400 error if the boxer is not found.
-            500 error if there is an issue retrieving the boxer from the database.
-
-        """
-        try:
-            app.logger.info(f"Received request to retrieve boxer with ID {boxer_id}")
-
-            boxer = Boxers.get_boxer_by_id(boxer_id)
-
-            if not boxer:
-                app.logger.warning(f"Boxer with ID {boxer_id} not found.")
-                return make_response(jsonify({
-                    "status": "error",
-                    "message": f"Boxer with ID {boxer_id} not found"
-                }), 400)
-
-            app.logger.info(f"Successfully retrieved boxer: {boxer}")
-            return make_response(jsonify({
-                "status": "success",
-                "boxer": boxer
-            }), 200)
-
-        except Exception as e:
-            app.logger.error(f"Error retrieving boxer with ID {boxer_id}: {e}")
-            return make_response(jsonify({
-                "status": "error",
-                "message": "An internal error occurred while retrieving the boxer",
-                "details": str(e)
-            }), 500)
-
-
-    @app.route('/api/get-boxer-by-name/<string:boxer_name>', methods=['GET'])
-    @login_required
-    def get_boxer_by_name(boxer_name: str) -> Response:
-        """Route to get a boxer by its name.
-
-        Path Parameter:
-            - boxer_name (str): The name of the boxer.
-
-        Returns:
-            JSON response containing the boxer details if found.
-
-        Raises:
-            400 error if the boxer name is missing or not found.
-            500 error if there is an issue retrieving the boxer from the database.
-
-        """
-        try:
-            app.logger.info(f"Received request to retrieve boxer with name '{boxer_name}'")
-
-            boxer = Boxers.get_boxer_by_name(boxer_name)
-
-            if not boxer:
-                app.logger.warning(f"Boxer '{boxer_name}' not found.")
-                return make_response(jsonify({
-                    "status": "error",
-                    "message": f"Boxer '{boxer_name}' not found"
-                }), 400)
-
-            app.logger.info(f"Successfully retrieved boxer: {boxer}")
-            return make_response(jsonify({
-                "status": "success",
-                "boxer": boxer
-            }), 200)
-
-        except Exception as e:
-            app.logger.error(f"Error retrieving boxer with name '{boxer_name}': {e}")
-            return make_response(jsonify({
-                "status": "error",
-                "message": "An internal error occurred while retrieving the boxer",
-                "details": str(e)
-            }), 500)
-
-
-        
-    ##########################################################
+    # @app.route('/api/delete-boxer/<int:boxer_id>', methods=['DELETE'])
+    # @login_required
+    # def delete_boxer(boxer_id: int) -> Response:
+    #     """Route to delete a boxer by ID.
     #
-    # Duck API
+    #     Path Parameter:
+    #         - boxer_id (int): The ID of the boxer to delete.
     #
-    ##########################################################
+    #     Returns:
+    #         JSON response indicating success of the operation.
+    #
+    #     Raises:
+    #         400 error if the boxer does not exist.
+    #         500 error if there is an issue removing the boxer from the database.
+    #
+    #     """
+    #     try:
+    #         app.logger.info(f"Received request to delete boxer with ID {boxer_id}")
+    #
+    #         # Check if the boxer exists before attempting to delete
+    #         boxer = Boxers.get_boxer_by_id(boxer_id)
+    #         if not boxer:
+    #             app.logger.warning(f"Boxer with ID {boxer_id} not found.")
+    #             return make_response(jsonify({
+    #                 "status": "error",
+    #                 "message": f"Boxer with ID {boxer_id} not found"
+    #             }), 400)
+    #
+    #         Boxers.delete_boxer(boxer_id)
+    #         app.logger.info(f"Successfully deleted boxer with ID {boxer_id}")
+    #
+    #         return make_response(jsonify({
+    #             "status": "success",
+    #             "message": f"Boxer with ID {boxer_id} deleted successfully"
+    #         }), 200)
+    #
+    #     except Exception as e:
+    #         app.logger.error(f"Failed to add boxer: {e}")
+    #         return make_response(jsonify({
+    #             "status": "error",
+    #             "message": "An internal error occurred while deleting the boxer",
+    #             "details": str(e)
+    #         }), 500)
 
-    @app.route('/api/ducks/random', methods=['GET'])
-    @login_required  # Remove this if you want public access
-    def get_random_duck() -> Response:
-        """Get a random duck image.
-        
-        Query Parameters:
-            - type (optional): Filter for image type ('JPG' or 'GIF')
-            
-        Returns:
-            JSON response with the duck image URL and message.
-        """
-        image_type = request.args.get('type')
-        endpoint = "https://random-d.uk/api/v2/random"
-        
-        params = {}
-        if image_type and image_type.upper() in ["JPG", "GIF"]:
-            params["type"] = image_type.upper()
-            
-        try:
-            app.logger.info(f"Fetching random duck image with params: {params}")
-            response = requests.get(endpoint, params=params)
-            response.raise_for_status()
-            return make_response(jsonify(response.json()), 200)
-        except Exception as e:
-            app.logger.error(f"Error fetching random duck: {e}")
-            return make_response(jsonify({
-                "status": "error",
-                "message": "Failed to fetch duck image",
-                "details": str(e)
-            }), 500)
 
-    @app.route('/api/ducks/quack', methods=['GET'])
-    @login_required  # Remove this if you want public access
-    def get_quack() -> Response:
-        """Get a random duck image using the quack endpoint.
-        
-        Returns:
-            JSON response with the duck image URL and message.
-        """
-        endpoint = "https://random-d.uk/api/v2/quack"
-        
-        try:
-            app.logger.info("Fetching quack duck image")
-            response = requests.get(endpoint)
-            response.raise_for_status()
-            return make_response(jsonify(response.json()), 200)
-        except Exception as e:
-            app.logger.error(f"Error fetching quack duck: {e}")
-            return make_response(jsonify({
-                "status": "error",
-                "message": "Failed to fetch duck image",
-                "details": str(e)
-            }), 500)
+    # @app.route('/api/get-boxer-by-id/<int:boxer_id>', methods=['GET'])
+    # @login_required
+    # def get_boxer_by_id(boxer_id: int) -> Response:
+    #     """Route to get a boxer by its ID.
+    #
+    #     Path Parameter:
+    #         - boxer_id (int): The ID of the boxer.
+    #
+    #     Returns:
+    #         JSON response containing the boxer details if found.
+    #
+    #     Raises:
+    #         400 error if the boxer is not found.
+    #         500 error if there is an issue retrieving the boxer from the database.
+    #
+    #     """
+    #     try:
+    #         app.logger.info(f"Received request to retrieve boxer with ID {boxer_id}")
+    #
+    #         boxer = Boxers.get_boxer_by_id(boxer_id)
+    #
+    #         if not boxer:
+    #             app.logger.warning(f"Boxer with ID {boxer_id} not found.")
+    #             return make_response(jsonify({
+    #                 "status": "error",
+    #                 "message": f"Boxer with ID {boxer_id} not found"
+    #             }), 400)
+    #
+    #         app.logger.info(f"Successfully retrieved boxer: {boxer}")
+    #         return make_response(jsonify({
+    #             "status": "success",
+    #             "boxer": boxer
+    #         }), 200)
+    #
+    #     except Exception as e:
+    #         app.logger.error(f"Error retrieving boxer with ID {boxer_id}: {e}")
+    #         return make_response(jsonify({
+    #             "status": "error",
+    #             "message": "An internal error occurred while retrieving the boxer",
+    #             "details": str(e)
+    #         }), 500)
 
-    @app.route('/api/ducks/list', methods=['GET'])
-    @login_required  # Remove this if you want public access
-    def get_duck_list() -> Response:
-        """Get list of all available duck images.
-        
-        Returns:
-            JSON response with lists of images and gifs.
-        """
-        endpoint = "https://random-d.uk/api/v2/list"
-        
-        try:
-            app.logger.info("Fetching duck image list")
-            response = requests.get(endpoint)
-            response.raise_for_status()
-            return make_response(jsonify(response.json()), 200)
-        except Exception as e:
-            app.logger.error(f"Error fetching duck list: {e}")
-            return make_response(jsonify({
-                "status": "error",
-                "message": "Failed to fetch duck image list",
-                "details": str(e)
-            }), 500)
 
-    @app.route('/api/ducks/http/<int:status_code>', methods=['GET'])
-    @login_required  # Remove this if you want public access
-    def get_http_duck(status_code: int) -> Response:
-        """Get a duck image representing an HTTP status code.
-        
-        Path Parameters:
-            - status_code: HTTP status code (100-599)
-            
-        Returns:
-            JSON response with the URL for the HTTP duck image.
-        """
-        if not isinstance(status_code, int) or status_code < 100 or status_code >= 600:
-            app.logger.warning(f"Invalid HTTP status code: {status_code}")
-            return make_response(jsonify({
-                "status": "error",
-                "message": f"Invalid HTTP status code: {status_code}"
-            }), 400)
-            
-        url = f"https://random-d.uk/api/v2/http/{status_code}"
-        app.logger.info(f"Returning HTTP {status_code} duck image")
-        return make_response(jsonify({
-            "status": "success",
-            "url": url,
-            "message": f"HTTP {status_code} Duck"
-        }), 200)
+    # @app.route('/api/get-boxer-by-name/<string:boxer_name>', methods=['GET'])
+    # @login_required
+    # def get_boxer_by_name(boxer_name: str) -> Response:
+    #     """Route to get a boxer by its name.
+    #
+    #     Path Parameter:
+    #         - boxer_name (str): The name of the boxer.
+    #
+    #     Returns:
+    #         JSON response containing the boxer details if found.
+    #
+    #     Raises:
+    #         400 error if the boxer name is missing or not found.
+    #         500 error if there is an issue retrieving the boxer from the database.
+    #
+    #     """
+    #     try:
+    #         app.logger.info(f"Received request to retrieve boxer with name '{boxer_name}'")
+    #
+    #         boxer = Boxers.get_boxer_by_name(boxer_name)
+    #
+    #         if not boxer:
+    #             app.logger.warning(f"Boxer '{boxer_name}' not found.")
+    #             return make_response(jsonify({
+    #                 "status": "error",
+    #                 "message": f"Boxer '{boxer_name}' not found"
+    #             }), 400)
+    #
+    #         app.logger.info(f"Successfully retrieved boxer: {boxer}")
+    #         return make_response(jsonify({
+    #             "status": "success",
+    #             "boxer": boxer
+    #         }), 200)
+    #
+    #     except Exception as e:
+    #         app.logger.error(f"Error retrieving boxer with name '{boxer_name}': {e}")
+    #         return make_response(jsonify({
+    #             "status": "error",
+    #             "message": "An internal error occurred while retrieving the boxer",
+    #             "details": str(e)
+    #         }), 500)
 
     @app.route('/api/ducks/favorites', methods=['GET'])
     @login_required
