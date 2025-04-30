@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 configure_logger(logger)
 
 
-class Boxers(db.Model):
+class Ducks(db.Model):
     """Represents a competitive boxer in the system.
 
     This model maps to the 'boxers' table in the database and stores personal
@@ -23,144 +23,68 @@ class Boxers(db.Model):
     __tablename__ = "Boxers"
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = db.Column(db.String, nullable=False)
-    weight = db.Column(db.Float, nullable=False)
-    weight_class = db.Column(db.String, nullable=False)
-    height = db.Column(db.Float, nullable=False)
-    reach = db.Column(db.Float, nullable=False)
-    age = db.Column(db.Integer, nullable=False)
-    fights = db.Column(db.Integer, nullable=False, default=0)
-    wins = db.Column(db.Integer, nullable=False, default=0)
+    url = db.Column(db.String, nullable=False)
 
 
-    def __init__(self, name: str, weight: float, height: float, reach: float, age: int):
-        """Initialize a new Boxer instance with basic attributes.
+    def __init__(self, url: str):
+        """Initialize a new Duck instance with basic attributes.
 
         Args:
-            name (str): The boxer's name. Must be unique.
-            weight (float): The boxer's weight in pounds. Must be at least 125.
-            height (float): The boxer's height in inches. Must be greater than 0.
-            reach (float): The boxer's reach in inches. Must be greater than 0.
-            age (int): The boxer's age. Must be between 18 and 40, inclusive.
-
-        Notes:
-            - The boxer's weight class is automatically assigned based on weight.
-            - Fight statistics (`fights` and `wins`) are initialized to 0 by default in the database schema.
+            url: The URL of the duck image.
 
         """
         self.id = None
-        self.name = name
-        self.weight = weight
-        self.weight_class = self.get_weight_class(weight)
-        self.height = height
-        self.reach = reach
-        self.age = age
-        self.fights = 0
-        self.wins = 0
+        self.url = url
 
     def validate(self) -> None:
-        """Validates the boxer instance before committing to the database.
+        """Validates the duck instance before committing to the database.
 
         Raises:
             ValueError: If any required fields are invalid.
         """
-        if not self.name or not isinstance(self.name, str):
-            raise ValueError("Name must be a non-empty string.")
-        if not isinstance(self.weight, float) or self.weight < 125:
-            raise ValueError(f"Invalid weight: {self.weight}. Must be at least 125.")
-        if not isinstance(self.height, float) or self.height <= 0:
-            raise ValueError(f"Invalid height: {self.height}. Must be greater than 0.")
-        if not isinstance(self.reach, float) or self.reach <= 0:
-            raise ValueError(f"Invalid reach: {self.reach}. Must be greater than 0.")
-        if not isinstance(self.age, int) or self.age < 18 or self.age > 40:
-            raise ValueError(f"Invalid age: {self.age}. Must be between 18 and 40.")
+        if not self.url or not isinstance(self.url, str):
+            raise ValueError("URL must be a non-empty string.")
+
 
     @classmethod
-    def get_weight_class(cls, weight: float) -> str:
-        """Determine the weight class based on weight.
-
-        This method is defined as a class method rather than a static method,
-        even though it does not currently require access to the class object.
-        Both @staticmethod and @classmethod would be valid choices in this context;
-        however, using @classmethod makes it easier to support subclass-specific
-        behavior or logic overrides in the future.
+    def create_duck(cls, url: str) -> None:
+        """Create and persist a new Duck instance.
 
         Args:
-            weight: The weight of the boxer.
-
-        Returns:
-            str: The weight class of the boxer.
+            url: The URL of the duck image.
 
         Raises:
-            ValueError: If the weight is less than 125.
-
-        """
-        if weight >= 203:
-            weight_class = 'HEAVYWEIGHT'
-        elif weight >= 166:
-            weight_class = 'MIDDLEWEIGHT'
-        elif weight >= 133:
-            weight_class = 'LIGHTWEIGHT'
-        elif weight >= 125:
-            weight_class = 'FEATHERWEIGHT'
-        else:
-            raise ValueError(f"Invalid weight: {weight}. Weight must be at least 125.")
-
-        return weight_class
-
-    @classmethod
-    def create_boxer(cls, name: str, weight: float, height: float, reach: float, age: int) -> None:
-        """Create and persist a new Boxer instance.
-
-        Args:
-            name: The name of the boxer.
-            weight: The weight of the boxer.
-            height: The height of the boxer.
-            reach: The reach of the boxer.
-            age: The age of the boxer.
-
-        Raises:
-            IntegrityError: If a boxer with the same name already exists.
-            ValueError: If the weight is less than 125 or if any of the input parameters are invalid.
+            IntegrityError: If a boxer with the same URL already exists.
+            ValueError: If the input parameters are invalid.
             SQLAlchemyError: If there is a database error during creation.
 
         """
-        logger.info(f"Creating boxer: {name}, {weight=} {height=} {reach=} {age=}")
+        logger.info(f"Creating Duck: {url}")
 
         try:
-            if isinstance(weight, int):
-                weight = float(weight)
-            if isinstance(height, int):
-                height = float(height)
-            if isinstance(reach, int):
-                reach = float(reach)
-
-            boxer = Boxers(
-                name=name.strip(),
-                weight=weight,
-                height=height,
-                reach=reach,
-                age=age
+            duck = Ducks(
+                url = url.strip()
             )
-            boxer.validate()
+            duck.validate()
+
         except ValueError as e:
             logger.warning(f"Validation failed: {e}")
             raise
 
         # Check for existing boxer with same name
-        existing = Boxers.query.filter_by(name=name.strip()).first()
+        existing = Ducks.query.filter_by(url=url.strip()).first()
         if existing:
-            logger.error(f"Boxer already exists: {name.strip()}")
-            raise ValueError(f"Boxer already exists: {name.strip()}")
+            logger.error(f"Duck already exists: {url.strip()}")
+            raise ValueError(f"Duck already exists: {url.strip()}")
 
         try:
-            db.session.add(boxer)
+            db.session.add(duck)
             db.session.commit()
-            logger.info(f"Boxer created successfully: {name}")
+            logger.info(f"Duck created successfully: {url}")
         except IntegrityError:
-            logger.error(f"Boxer with name '{name}' already exists.")
+            logger.error(f"Duck at '{url}' already exists.")
             db.session.rollback()
-            raise IntegrityError(f"Boxer with name '{name}' already exists.")
+            raise IntegrityError(f"Duck at '{url}' already exists.")
         except SQLAlchemyError as e:
             logger.error(f"Database error during creation: {e}")
             db.session.rollback()
