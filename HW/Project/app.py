@@ -254,7 +254,7 @@ def create_app(config_class=ProductionConfig):
 
     ##########################################################
     #
-    # Boxers
+    # Ducks
     #
     ##########################################################
 
@@ -319,49 +319,49 @@ def create_app(config_class=ProductionConfig):
             }), 500)
 
 
-    # @app.route('/api/delete-boxer/<int:boxer_id>', methods=['DELETE'])
-    # @login_required
-    # def delete_boxer(boxer_id: int) -> Response:
-    #     """Route to delete a boxer by ID.
-    #
-    #     Path Parameter:
-    #         - boxer_id (int): The ID of the boxer to delete.
-    #
-    #     Returns:
-    #         JSON response indicating success of the operation.
-    #
-    #     Raises:
-    #         400 error if the boxer does not exist.
-    #         500 error if there is an issue removing the boxer from the database.
-    #
-    #     """
-    #     try:
-    #         app.logger.info(f"Received request to delete boxer with ID {boxer_id}")
-    #
-    #         # Check if the boxer exists before attempting to delete
-    #         boxer = Boxers.get_boxer_by_id(boxer_id)
-    #         if not boxer:
-    #             app.logger.warning(f"Boxer with ID {boxer_id} not found.")
-    #             return make_response(jsonify({
-    #                 "status": "error",
-    #                 "message": f"Boxer with ID {boxer_id} not found"
-    #             }), 400)
-    #
-    #         Boxers.delete_boxer(boxer_id)
-    #         app.logger.info(f"Successfully deleted boxer with ID {boxer_id}")
-    #
-    #         return make_response(jsonify({
-    #             "status": "success",
-    #             "message": f"Boxer with ID {boxer_id} deleted successfully"
-    #         }), 200)
-    #
-    #     except Exception as e:
-    #         app.logger.error(f"Failed to add boxer: {e}")
-    #         return make_response(jsonify({
-    #             "status": "error",
-    #             "message": "An internal error occurred while deleting the boxer",
-    #             "details": str(e)
-    #         }), 500)
+    @app.route('/api/delete-duck/<int:duck_id>', methods=['DELETE'])
+    @login_required
+    def delete_duck(duck_id: int) -> Response:
+        """Route to delete a duck by ID.
+
+        Path Parameter:
+            - duck_id (int): The ID of the duck to delete.
+
+        Returns:
+            JSON response indicating success of the operation.
+
+        Raises:
+            400 error if the duck does not exist.
+            500 error if there is an issue removing the duck from the database.
+
+        """
+        try:
+            app.logger.info(f"Received request to delete duck with ID {duck_id}")
+
+            # Check if the duck exists before attempting to delete
+            duck = Ducks.get_duck_by_id(duck_id)
+            if not duck:
+                app.logger.warning(f"Duck with ID {duck_id} not found.")
+                return make_response(jsonify({
+                    "status": "error",
+                    "message": f"Duck with ID {duck_id} not found"
+                }), 400)
+
+            Ducks.delete_duck(duck_id)
+            app.logger.info(f"Successfully deleted duck with ID {duck_id}")
+
+            return make_response(jsonify({
+                "status": "success",
+                "message": f"Duck with ID {duck_id} deleted successfully"
+            }), 200)
+
+        except Exception as e:
+            app.logger.error(f"Failed to delete duck: {e}")
+            return make_response(jsonify({
+                "status": "error",
+                "message": "An internal error occurred while deleting the duck",
+                "details": str(e)
+            }), 500)
 
 
     # @app.route('/api/get-boxer-by-id/<int:boxer_id>', methods=['GET'])
