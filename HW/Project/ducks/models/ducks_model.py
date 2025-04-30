@@ -91,32 +91,32 @@ class Ducks(db.Model):
             raise
 
     @classmethod
-    def get_boxer_by_id(cls, boxer_id: int) -> "Boxers":
-        """Retrieve a boxer by ID.
+    def get_duck_by_id(cls, duck_id: int) -> "Ducks":
+        """Retrieve a duck by ID.
 
         Args:
-            boxer_id: The ID of the boxer.
+            duck_id: The ID of the duck.
 
         Returns:
-            Boxer: The boxer instance.
+            Duck: The duck instance.
 
         Raises:
-            ValueError: If the boxer with the given ID does not exist.
+            ValueError: If the duck with the given ID does not exist.
 
         """
-        logger.info(f"Attempting to retrieve boxer with ID: {boxer_id}")
+        logger.info(f"Attempting to retrieve duck with ID: {duck_id}")
 
         try:
-            boxer = db.session.get(cls, boxer_id)
-            if boxer is None or not boxer:
-                logger.info(f"Boxer with ID {boxer_id} not found.")
-                raise ValueError(f"Boxer with ID {boxer_id} not found.")
+            duck = db.session.get(cls, duck_id)
+            if duck is None or not duck:
+                logger.info(f"Duck with ID {duck_id} not found.")
+                raise ValueError(f"Duck with ID {duck_id} not found.")
 
-            logger.info(f"Successfully retrieved boxer: {boxer.id} - {boxer.name}")
-            return boxer
+            logger.info(f"Successfully retrieved duck: {duck.id} - {duck.url}")
+            return duck
 
         except SQLAlchemyError as e:
-            logger.error(f"Database error while retrieving boxer by ID {boxer_id}: {e}")
+            logger.error(f"Database error while retrieving duck by ID {duck_id}: {e}")
             raise
 
     @classmethod
@@ -150,23 +150,23 @@ class Ducks(db.Model):
             raise
 
     @classmethod
-    def delete(cls, boxer_id: int) -> None:
-        """Delete a boxer by ID.
+    def delete(cls, duck_id: int) -> None:
+        """Delete a duck by ID.
 
         Args:
-            boxer_id: The ID of the boxer to delete.
+            duck_id: The ID of the duck to delete.
 
         Raises:
-            ValueError: If the boxer with the given ID does not exist.
+            ValueError: If the duck with the given ID does not exist.
 
         """
-        boxer = cls.get_boxer_by_id(boxer_id)
-        if boxer is None:
-            logger.info(f"Boxer with ID {boxer_id} not found.")
-            raise ValueError(f"Boxer with ID {boxer_id} not found.")
-        db.session.delete(boxer)
+        duck = cls.get_duck_by_id(duck_id)
+        if duck is None:
+            logger.info(f"Duck with ID {duck_id} not found.")
+            raise ValueError(f"Duck with ID {duck_id} not found.")
+        db.session.delete(duck)
         db.session.commit()
-        logger.info(f"Boxer with ID {boxer_id} permanently deleted.")
+        logger.info(f"Duck with ID {duck_id} permanently deleted.")
 
     def update_stats(self, result: str) -> None:
         """Update the boxer's fight and win count based on result.
