@@ -2,40 +2,36 @@ import requests
 
 
 def run_smoketest():
+    # region BASE
     base_url = "http://localhost:5000/api"
     username = "test"
     password = "test"
+    # endregion
 
-    test_muhammad_ali = {
-        "name": "Muhammad Ali",
-        "weight": 210,
-        "height": 191,
-        "reach": 78,
-        "age": 32
-    }
-
-    test_joe_frazier = {
-        "name": "Joe Frazier",
-        "weight": 205,
-        "height": 182,
-        "reach": 73,
-        "age": 30
-    }
-
+    # region HEALTH CHECK
     health_response = requests.get(f"{base_url}/health")
     assert health_response.status_code == 200
     assert health_response.json()["status"] == "success"
+    # endregion
 
+    # region RESET
     delete_user_response = requests.delete(f"{base_url}/reset-users")
     assert delete_user_response.status_code == 200
     assert delete_user_response.json()["status"] == "success"
     print("Reset users successful")
 
-    delete_boxer_response = requests.delete(f"{base_url}/reset-boxers")
-    assert delete_boxer_response.status_code == 200
-    assert delete_boxer_response.json()["status"] == "success"
-    print("Reset boxers successful")
+    # delete_ducks_response = requests.delete(f"{base_url}/reset-ducks")
+    # assert delete_ducks_response.status_code == 200
+    # assert delete_ducks_response.json()["status"] == "success"
+    # print("Reset ducks successful")
 
+    # delete_favorites_response = requests.delete(f"{base_url}/reset-favorites")
+    # assert delete_favorites_response.status_code == 200
+    # assert delete_favorites_response.json()["status"] == "success"
+    # print("Reset favorites successful")
+    # endregion
+
+    # region CREATE USER
     create_user_response = requests.put(f"{base_url}/create-user", json={
         "username": username,
         "password": password
@@ -43,10 +39,11 @@ def run_smoketest():
     assert create_user_response.status_code == 201
     assert create_user_response.json()["status"] == "success"
     print("User creation successful")
+    # endregion
 
+    # region LOGIN
     session = requests.Session()
 
-    # Log in
     login_resp = session.post(f"{base_url}/login", json={
         "username": username,
         "password": password
@@ -54,13 +51,9 @@ def run_smoketest():
     assert login_resp.status_code == 200
     assert login_resp.json()["status"] == "success"
     print("Login successful")
+    # endregion
 
-    create_boxer_resp = session.post(f"{base_url}/add-boxer", json=test_muhammad_ali)
-    assert create_boxer_resp.status_code == 201
-    assert create_boxer_resp.json()["status"] == "success"
-    print("Boxer creation successful")
-
-    # Change password
+    # region CHANGE PASSWORD
     change_password_resp = session.post(f"{base_url}/change-password", json={
         "new_password": "new_password"
     })
@@ -68,7 +61,6 @@ def run_smoketest():
     assert change_password_resp.json()["status"] == "success"
     print("Password change successful")
 
-    # Log in with new password
     login_resp = session.post(f"{base_url}/login", json={
         "username": username,
         "password": "new_password"
@@ -76,23 +68,57 @@ def run_smoketest():
     assert login_resp.status_code == 200
     assert login_resp.json()["status"] == "success"
     print("Login with new password successful")
+    # endregion
 
-    create_boxer_resp = session.post(f"{base_url}/add-boxer", json=test_joe_frazier)
-    assert create_boxer_resp.status_code == 201
-    assert create_boxer_resp.json()["status"] == "success"
-    print("Boxer creation successful")
+    # region GET DUCK
+    get_duck_resp = session.post(f"{base_url}/get-duck")
+    assert get_duck_resp.status_code == 201
+    assert get_duck_resp.json()["status"] == "success"
+    print("Duck got getted")
+    # endregion
 
-    # Log out
+    # region SAVE DUCK
+    get_duck_resp = session.post(f"{base_url}/save-duck")
+    assert get_duck_resp.status_code == 201
+    assert get_duck_resp.json()["status"] == "success"
+    print("A Duck was saved!")
+    # endregion
+
+    # region REMOVE DUCK
+    get_duck_resp = session.post(f"{base_url}/remove-duck")
+    assert get_duck_resp.status_code == 201
+    assert get_duck_resp.json()["status"] == "success"
+    print("We lost a duck...")
+    # endregion
+
+    # region LIST DUCKS
+    get_duck_resp = session.post(f"{base_url}/list-ducks")
+    assert get_duck_resp.status_code == 201
+    assert get_duck_resp.json()["status"] == "success"
+    print("Ducks were listed. You're a regular birdwatcher!")
+    # endregion
+
+    # region QUACK
+    get_duck_resp = session.post(f"{base_url}/quack")
+    assert get_duck_resp.status_code == 201
+    assert get_duck_resp.json()["status"] == "success"
+    print("QUACK!")
+    # endregion
+
+    # region LOGOUT
     logout_resp = session.post(f"{base_url}/logout")
     assert logout_resp.status_code == 200
     assert logout_resp.json()["status"] == "success"
     print("Logout successful")
+    # endregion
 
-    create_boxer_logged_out_resp = session.post(f"{base_url}/add-boxer", json=test_muhammad_ali)
+    # region NO AUTH
+    get_duck_logged_out_resp = session.post(f"{base_url}/get-duck")
     # This should fail because we are logged out
-    assert create_boxer_logged_out_resp.status_code == 401
-    assert create_boxer_logged_out_resp.json()["status"] == "error"
-    print("Boxer creation failed as expected")
+    assert get_duck_logged_out_resp.status_code == 401
+    assert get_duck_logged_out_resp.json()["status"] == "error"
+    print("Duck get failed as expected")
+    # endregion
 
 if __name__ == "__main__":
     run_smoketest()

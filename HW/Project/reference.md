@@ -1,6 +1,6 @@
 ## APIs
-- [Random-d.uk API](https://random-d.uk/api)
-- [Freesound API](https://freesound.org/docs/api/overview.html)
+- [X] [Random-d.uk API](https://random-d.uk/api)
+- [X] [Freesound API](https://freesound.org/docs/api/overview.html)
 
 ## Endpoints
 - [ ] [/get-duck](http://127.0.0.1:5000/get-duck)
