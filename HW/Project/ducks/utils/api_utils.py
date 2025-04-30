@@ -1,6 +1,7 @@
 import logging
 import os
 import requests
+from random import choice
 
 from ducks.utils.logger import configure_logger
 
@@ -9,48 +10,93 @@ logger = logging.getLogger(__name__)
 configure_logger(logger)
 
 
-RANDOM_ORG_URL = os.getenv("RANDOM_ORG_URL",
-                           "https://www.random.org/decimal-fractions/?num=1&dec=2&col=1&format=plain&rnd=new")
+RANDOM_DUCK_URL = os.getenv("RANDOM_DUCK_URL", "https://random-d.uk/api/v2/quack")
+SOUND_QUACK_URL = os.getenv("SOUND_QUACK_URL", "https://freesound.org/apiv2/search/text/?query=duck%20quack&format=json")
+SOUND_TOKEN = os.getenv("SOUND_TOKEN")
 
 
-def get_random() -> float:
+def get_duck() -> str:
     """
-    Fetches a random float between 0 and 1 from random.org.
+    Fetches a random duck.
 
     Returns:
-        float: The random number fetched from random.org.
+        str: The url of the image.
 
     Raises:
-        ValueError: If the response from random.org is not a valid float.
-        RuntimeError: If the request to random.org fails due to a timeout or other request-related error.
+        ValueError: If the response from random-d.uck is not a valid result.
+        RuntimeError: If the request to random-d.uck fails due to a timeout or other request-related error.
 
     """
     try:
-        logger.info(f"Fetching random number from {RANDOM_ORG_URL}")
+        logger.info(f"Fetching random duck from {RANDOM_DUCK_URL}")
 
-        response = requests.get(RANDOM_ORG_URL, timeout=5)
+        response = requests.get(RANDOM_DUCK_URL, timeout=5)
 
         # Check if the request was successful
         response.raise_for_status()
 
-        random_number_str = response.text.strip()
-
         try:
-            random_number = float(random_number_str)
+            random_duck_url = response.json()['url']
         except ValueError:
-            logger.error(f"Invalid response from random.org: {random_number_str}")
-            raise ValueError(f"Invalid response from random.org: {random_number_str}")
+            logger.error(f"Invalid response from random-d.uck: {response.text}")
+            raise ValueError(f"Invalid response from random-d.uck: {response.text}")
 
-        logger.debug(f"Received random number: {random_number:.3f}")
-        logger.info(f"Successfully fetched random number")
+        logger.debug(f"Received random duck: {random_duck_url}")
+        logger.info(f"Successfully fetched random duck")
 
-        return random_number
+        return random_duck_url
 
     except requests.exceptions.Timeout:
-        logger.error("Request to random.org timed out.")
-        raise RuntimeError("Request to random.org timed out.")
+        logger.error("Request to random-d.uck timed out.")
+        raise RuntimeError("Request to random-d.uck timed out.")
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"Request to random.org failed: {e}")
-        raise RuntimeError(f"Request to random.org failed: {e}")
+        logger.error(f"Request to random-d.uck failed: {e}")
+        raise RuntimeError(f"Request to random-d.uck failed: {e}")
 
+
+def get_quack() -> str:
+    """
+    Fetches a random quack.
+
+    Returns:
+        str: The url of the quack.
+
+    Raises:
+        ValueError: If the response from freesound.org is not a valid result.
+        RuntimeError: If the request to freesound.org fails due to a timeout or other request-related error.
+
+    """
+    try:
+        logger.info(f"Fetching random quack from {SOUND_QUACK_URL}")
+
+        # Query Results
+        response = requests.get(SOUND_QUACK_URL + "&token=" + SOUND_TOKEN, timeout=5)
+        response.raise_for_status()  # Check if the request was successful
+        try:
+            random_quack_id = choice(response.json()['results'])['id']
+        except ValueError:
+            logger.error(f"Invalid response from freesound.org: {response.text}")
+            raise ValueError(f"Invalid response from freesound.org: {response.text}")
+
+        # Get URL
+        response = requests.get("https://freesound.org/apiv2/sounds/" + str(random_quack_id) + "?format=json" + "&token=" + SOUND_TOKEN, timeout=5)
+        response.raise_for_status()  # Check if the request was successful
+        try:
+            random_quack_url = response.json()['previews']['preview-hq-mp3']
+        except ValueError:
+            logger.error(f"Invalid response from freesound.org: {response.text}")
+            raise ValueError(f"Invalid response from freesound.org: {response.text}")
+
+        logger.debug(f"Received random quack: {random_quack_url}")
+        logger.info(f"Successfully fetched random quack")
+
+        return random_quack_url
+
+    except requests.exceptions.Timeout:
+        logger.error("Request to freesound.org timed out.")
+        raise RuntimeError("Request to freesound.org timed out.")
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request to freesound.org failed: {e}")
+        raise RuntimeError(f"Request to freesound.org failed: {e}")
