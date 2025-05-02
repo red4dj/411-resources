@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-# Copy the env file to the container
-COPY .env /app/.env
+# Enviornment Variables
+ENV SOUND_TOKEN=YOUR_FREESOUND_API_KEY
 
 # Install any needed packages specified in requirements.txt
 # In production, you would want to ensure that any re-compiled packages

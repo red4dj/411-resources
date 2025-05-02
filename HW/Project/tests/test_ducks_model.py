@@ -74,7 +74,7 @@ def test_get_duck_by_id_not_found(app):
 def test_delete_duck(session, sample_duck1):
     """Test deleting a duck by ID."""
     Ducks.delete_duck(sample_duck1.id)
-    assert session.query(Ducks).get(sample_duck1.id) is None
+    assert session.get(Ducks, sample_duck1.id) is None
 
 def test_delete_duck_not_found(app):
     """Test deleting a non-existent duck by ID."""

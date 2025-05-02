@@ -305,12 +305,14 @@ def create_app(config_class=ProductionConfig):
         app.logger.info("Received request for new duck")
 
         try:
-            url = Ducks.create_duck()
+            duck = Ducks.create_duck_random()
 
-            app.logger.info(f"Duck added successfully: {url}")
+            app.logger.info(f"Duck added successfully")
             return make_response(jsonify({
                 "status": "success",
-                "message": f"Duck '{url}' added successfully"
+                "message": f"Duck added successfully",
+                "id": duck.id,
+                "url": duck.url
             }), 201)
 
         except Exception as e:

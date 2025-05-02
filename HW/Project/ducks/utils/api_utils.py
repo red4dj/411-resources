@@ -1,5 +1,7 @@
 import logging
 import os
+from multiprocessing.context import AuthenticationError
+
 import requests
 from random import choice
 from json import loads
@@ -63,14 +65,24 @@ def get_quack() -> str:
     Raises:
         ValueError: If the response from freesound.org is not a valid result.
         RuntimeError: If the request to freesound.org fails due to a timeout or other request-related error.
+        AuthenticationError: If the request to freesound.org does not contain a valid API key.
     """
 
     try:
         logger.info(f"Fetching random quack from {SOUND_QUACK_URL}")
 
         # Query Results
-        response = requests.get(SOUND_QUACK_URL + "&token=" + SOUND_TOKEN, timeout=5)
-        response.raise_for_status()  # Check if the request was successful
+        try:
+            response = requests.get(SOUND_QUACK_URL + "&token=" + SOUND_TOKEN, timeout=5)
+            response.raise_for_status()  # Check if the request was successful
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 401:
+                logger.error(f"Request to freesound.org does not contain a valid API key")
+                raise AuthenticationError(f"Request to freesound.org does not contain a valid API key")
+            else:
+                logger.error(f"Request to freesound.org failed: {e}")
+                raise RuntimeError(f"Request to freesound.org failed: {e}")
+
         try:
             random_quack_id = choice(loads(response.text)['results'])['id']
         except ValueError:
@@ -78,8 +90,17 @@ def get_quack() -> str:
             raise ValueError(f"Invalid response from freesound.org: {response.text}")
 
         # Get URL
-        response = requests.get("https://freesound.org/apiv2/sounds/" + str(random_quack_id) + "?format=json" + "&token=" + SOUND_TOKEN, timeout=5)
-        response.raise_for_status()  # Check if the request was successful
+        try:
+            response = requests.get("https://freesound.org/apiv2/sounds/" + str(random_quack_id) + "?format=json" + "&token=" + SOUND_TOKEN, timeout=5)
+            response.raise_for_status()  # Check if the request was successful
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 401:
+                logger.error(f"Request to freesound.org does not contain a valid API key")
+                raise AuthenticationError(f"Request to freesound.org does not contain a valid API key")
+            else:
+                logger.error(f"Request to freesound.org failed: {e}")
+                raise RuntimeError(f"Request to freesound.org failed: {e}")
+
         try:
             random_quack_url = loads(response.text)['previews']['preview-hq-mp3']
         except ValueError:

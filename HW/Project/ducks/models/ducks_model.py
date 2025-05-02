@@ -47,7 +47,7 @@ class Ducks(db.Model):
 
 
     @classmethod
-    def create_duck_random(cls) -> None:
+    def create_duck_random(cls):
         """Create and persist a new Duck instance.
 
         Args:
@@ -91,6 +91,8 @@ class Ducks(db.Model):
             logger.error(f"Database error during creation: {e}")
             db.session.rollback()
             raise
+
+        return duck
 
     @classmethod
     def create_duck_with_url(cls, url: str) -> None:

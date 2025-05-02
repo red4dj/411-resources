@@ -130,8 +130,10 @@ Ducks provides the user with photos of ducks and allows them to save their favor
   - **Successful Response Example**:
     ```json
     {
-      "message": "Duck 'https://random-d.uk/api/1.gif' added successfully",
-      "status": "success"
+      "id": 1,
+      "message": "Duck added successfully",
+      "status": "success",
+      "url": "https://random-d.uk/api/1.gif"
     }
     ```
 
